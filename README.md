@@ -105,7 +105,7 @@ REGISTRY=ghcr.io REGISTRY_USER=myuser RELEASE=my-release docker buildx \
 ```bash
 docker run -d \
   --gpus all \
-  -v /workspace \
+  -v /root/autodl-tmp \
   -p 2999:2999 \
   -p 3000:3001 \
   -p 7777:7777 \
@@ -144,7 +144,7 @@ killing the service to view the logs
 
 | Application | Log file                    |
 |-------------|-----------------------------|
-| ComfyUI     | /workspace/logs/comfyui.log |
+| ComfyUI     | /root/autodl-tmp/logs/comfyui.log |
 
 ## Community and Contributing
 
