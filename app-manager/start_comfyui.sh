@@ -16,11 +16,11 @@ if [[ ${EXTRA_ARGS} ]]; then
 fi
 
 export PYTHONUNBUFFERED=1
-cd /workspace/ComfyUI
+cd /root/autodl-tmp/ComfyUI
 source venv/bin/activate
 echo "COMFYUI: Starting ComfyUI"
 TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"
-python3 main.py "${ARGS[@]}" > /workspace/logs/comfyui.log 2>&1 &
+python3 main.py "${ARGS[@]}" > /root/autodl-tmp/logs/comfyui.log 2>&1 &
 echo "COMFYUI: ComfyUI Started"
 deactivate
