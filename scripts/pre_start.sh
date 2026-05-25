@@ -4,11 +4,11 @@ export PYTHONUNBUFFERED=1
 export APP="ComfyUI"
 
 TEMPLATE_NAME="comfyui"
-TEMPLATE_VERSION_FILE="/workspace/${APP}/template.json"
+TEMPLATE_VERSION_FILE="/root/autodl-tmp/${APP}/template.json"
 
 echo "TEMPLATE NAME: ${TEMPLATE_NAME}"
 echo "TEMPLATE VERSION: ${TEMPLATE_VERSION}"
-echo "VENV PATH: /workspace/${APP}/venv"
+echo "VENV PATH: /root/autodl-tmp/${APP}/venv"
 
 if [[ -e ${TEMPLATE_VERSION_FILE} ]]; then
     EXISTING_TEMPLATE_NAME=$(jq -r '.template_name // empty' "$TEMPLATE_VERSION_FILE")
@@ -45,8 +45,8 @@ sync_directory() {
     # Ensure destination directory exists
     mkdir -p "${dst_dir}"
 
-    # Check whether /workspace is fuse, overlay, or xfs
-    local workspace_fs=$(df -T /workspace | awk 'NR==2 {print $2}')
+    # Check whether /root/autodl-tmp is fuse, overlay, or xfs
+    local workspace_fs=$(df -T /root/autodl-tmp | awk 'NR==2 {print $2}')
     echo "SYNC: File system type: ${workspace_fs}"
 
     if [ "${workspace_fs}" = "fuse" ]; then
@@ -89,7 +89,7 @@ sync_directory() {
         echo "SYNC: Using rsync for sync"
         rsync -rlptDu "${src_dir}/" "${dst_dir}/"
     else
-        echo "SYNC: Unknown filesystem type (${workspace_fs}) for /workspace, defaulting to rsync"
+        echo "SYNC: Unknown filesystem type (${workspace_fs}) for /root/autodl-tmp, defaulting to rsync"
         rsync -rlptDu "${src_dir}/" "${dst_dir}/"
     fi
 }
@@ -103,9 +103,9 @@ sync_apps() {
         start_time=$(date +%s)
 
         echo "SYNC: Sync 1 of 1"
-        sync_directory "/${APP}" "/workspace/${APP}"
+        sync_directory "/${APP}" "/root/autodl-tmp/${APP}"
         save_template_json
-        echo "${VENV_PATH}" > "/workspace/${APP}/venv_path"
+        echo "${VENV_PATH}" > "/root/autodl-tmp/${APP}/venv_path"
 
         # End the timer and calculate the duration
         end_time=$(date +%s)
@@ -122,7 +122,7 @@ sync_apps() {
 
 fix_venvs() {
     echo "VENV: Fixing venv..."
-    /fix_venv.sh /ComfyUI/venv /workspace/ComfyUI/venv
+    /fix_venv.sh /ComfyUI/venv /root/autodl-tmp/ComfyUI/venv
 }
 
 if [ "$(printf '%s\n' "$EXISTING_VERSION" "$TEMPLATE_VERSION" | sort -V | head -n 1)" = "$EXISTING_VERSION" ]; then
@@ -131,7 +131,7 @@ if [ "$(printf '%s\n' "$EXISTING_VERSION" "$TEMPLATE_VERSION" | sort -V | head -
         fix_venvs
 
         # Create logs directory
-        mkdir -p /workspace/logs
+        mkdir -p /root/autodl-tmp/logs
     else
         echo "SYNC: Existing version is the same as the template version, no syncing required."
     fi
@@ -141,7 +141,7 @@ fi
 
 # Start application manager
 cd /app-manager
-npm start > /workspace/logs/app-manager.log 2>&1 &
+npm start > /root/autodl-tmp/logs/app-manager.log 2>&1 &
 
 if [[ ${DISABLE_AUTOLAUNCH} ]]
 then
